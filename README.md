@@ -1,133 +1,173 @@
-# Scaffold CLI (`@lukecunningham/scaffold`)
+# @lukecunningham/scaffold
 
-Scaffold is a command-line tool that makes it easy to create new GitHub repositories with a standard setup. Using a simple YAML recipe, Scaffold will:
-
-- Create a repository (empty or from a GitHub template)
-- Set up `main` and `dev` branches
-- Apply branch protection rules (status checks, review requirements)
-- Add necessary secrets (for example, `GITHUB_TOKEN` or `VERCEL_TOKEN`)
-- Optionally generate project files using Projen
-- Copy files from a local boilerplate directory if needed
+Scaffold is a Node.js CLI (published on npm) that automates creating and configuring GitHub repositories from simple YAML “recipes.” You can combine multiple recipes, seed from a local folder or template repo, set up branches and protection rules, wire in secrets, and even bootstrap a new Projen-powered project—all with one command.
 
 ## Installation
 
-To install globally:
-
+**Globally**  
 ```bash
 npm install -g @lukecunningham/scaffold
 ```
 
-Or use without installing:
-
+**Or with npx**  
 ```bash
-npx @lukecunningham/scaffold <recipe> <repo-name>
+npx @lukecunningham/scaffold <recipe…> <target>
 ```
 
-## Requirements
+## Quickstart
 
-- Node.js (version 14 or higher) and npm
-- GitHub CLI (`gh`), with `gh auth login` already run
-- Environment variables for any secrets referenced in your recipe (e.g. `GITHUB_TOKEN`)
-- (Optional) A `.env` file in the working directory for local secret storage
-
-## Basic Usage
-
-```bash
-scaffold <recipe> <repo-name>
-```
-
-- `<recipe>`: the name of a YAML file in the `recipes/` folder (omit the `.yaml` extension)
-- `<repo-name>`: the name of the new repository under the configured GitHub owner
-
-### Example
-
-```bash
-npx @lukecunningham/scaffold scratch my-template
-```
-
-This command will:
-
-1. Create the public repository `lukegordoncunningham/my-template`
-2. Push `main` and `dev` branches
-3. Apply the branch protection rules defined in `recipes/scratch.yaml`
-4. Prompt for any missing secrets and store them if you choose
-5. Skip Projen scaffolding since `scratch.yaml` does not include a `project` section
-
-## Recipe Format
-
-Recipes are YAML files placed in the `recipes/` folder. A recipe has three sections:
-
-1. **source**: Defines where to get initial files
-
-   - `repo`: a GitHub template (owner/repo)
-   - `dir`: a local directory to copy into the new repo
-
-2. **github**: Settings for repository creation and protection
-
-   ```yaml
-   github:
-     owner: lukegordoncunningham
-     visibility: public  # or private
-
-     branches:
-       default: main
-       integration: dev
-
-     protection:
-       contexts: [lint, test, build]
-       approvals:
-         dev: 1
-         main: 2
-       strict: true
-       dismissStaleReviews: true
-       enforceAdmins: true
+1. Place one or more recipe files in `./recipes/` (see schema below).
+2. Run:  
+   ```bash
+   npx @lukecunningham/scaffold scratch my-org/my-repo
    ```
+   This will:
+   - Create `my-org/my-repo` on GitHub (or use a template repo if `source.repo` is set).
+   - Seed it from a local folder if `source.dir` is set.
+   - Push `main` and `dev` branches.
+   - Apply branch protection (CI contexts, approval counts, strict mode).
+   - Add Actions secrets (from environment or via prompt).
+   - If the recipe has a `project:` section, generate `.projenrc.js` and run `npx projen`.
 
-3. **project** (optional): Projen options for code scaffolding
+3. (Optional) Mark the new repo as a **Template repository** in GitHub settings.
 
-   ```yaml
-   project:
-     type: NextjsProject
-     defaultReleaseBranch: main
-     packageManager: NPM
-     deps: [react, react-dom, next]
-     devDeps: [eslint, prettier]
-     eslint: true
-     prettier: true
-   ```
+## Usage
 
-If the `project` section is missing, Scaffold will only handle GitHub setup and seeding.
+```bash
+scaffold <recipe-or-path> [<recipe-or-path> …] <target>
+```
+
+- **`<recipe-or-path>`**  
+  - Name of a file in `./recipes/<name>.yaml`, or  
+  - Path to any YAML file.  
+  Multiple recipes are merged in order (later values override earlier ones).
+
+- **`<target>`**  
+  - `owner/repo` to create on GitHub, or  
+  - A local path (e.g. `.`) to scaffold into an existing directory.
+
+## Recipe Schema
+
+Recipes live under `recipes/` and look like this:
+
+```yaml
+source:
+  # Choose one:
+  # repo: your-org/base-template
+  dir: ../seed-templates/base-boilerplate
+
+github:
+  owner: lukegordoncunningham
+  visibility: public
+
+  branches:
+    default:     main
+    integration: dev
+
+  protection:
+    contexts:
+      - lint
+      - test
+      - build
+    approvals:
+      dev:  1
+      main: 2
+    strict:             true
+    dismissStaleReviews: true
+    enforceAdmins:      true
+
+  secrets:
+    - name:    VERCEL_TOKEN
+      fromEnv: VERCEL_TOKEN
+
+project:
+  type:                 NextjsProject
+  defaultReleaseBranch: main
+  packageManager:       NPM
+  deps:
+    - react
+    - react-dom
+    - next
+  devDeps:
+    - eslint
+    - prettier
+    - tailwindcss
+    - postcss
+    - autoprefixer
+  eslint:               true
+  prettier:             true
+```
+
+- **`source`**  
+  - `repo`: a GitHub template repository (`owner/name`)  
+  - `dir`: a local folder whose contents are committed as the starter files
+
+- **`github`**  
+  - `owner`, `visibility`: passed to `gh repo create`  
+  - `branches`: names for the default and integration branches  
+  - `protection`: settings for `gh api ... /branches/<branch>/protection`  
+  - `secrets`: list of `{ name, fromEnv }` entries—secrets are read from the environment (or prompted) and injected via `gh secret set`
+
+- **`project`** (optional)  
+  Any Projen project options matching the constructor for the given `type`. If present, Scaffold will render a `.projenrc.js` and run `npx projen` so you get `package.json`, ESLint, workflows, lockfiles, etc., all generated for you.
+
+## Secrets Handling
+
+Scaffold checks `process.env[FROM_ENV]` for each `secrets:` entry.  
+If a variable is missing, it will prompt you to enter it.  
+You can keep your own `.env` (in `.gitignore`) if you’d like local persistence.
+
+## Projen Examples
+
+If you want to use Projen to generate your starter, add a `project:` block:
+
+```yaml
+# recipes/nextjs-sass.yaml
+source:
+  repo: your-org/nextjs-sass-template
+
+github:
+  owner: your-org
+  # … same as above …
+
+project:
+  type:                 NextjsProject
+  defaultReleaseBranch: main
+  packageManager:       NPM
+  deps:
+    - react
+    - react-dom
+    - next
+  devDeps:
+    - sass
+    - eslint
+    - prettier
+  eslint:               true
+  prettier:             true
+```
+
+Scaffold will generate a `.projenrc.js` using those options, run `npx projen`, and commit the results.
 
 ## Local Development
 
-1. Clone this repository:
+1. Clone with HTTPS:
    ```bash
    git clone https://github.com/lukegordoncunningham/scaffold.git
    cd scaffold
+   ```
+2. Install & synth:
+   ```bash
    npm install
    npx projen
    ```
-2. (Optional) Link the package to test as a global tool:
+3. Test:
    ```bash
-   npm link
+   GITHUB_TOKEN=ghp_xxx VERCEL_TOKEN=vercel_yyy      npx scaffold scratch ./test-output
    ```
-3. Run a recipe locally:
-   ```bash
-   scaffold scratch test-repo
-   ```
-4. Add or update recipes in the `recipes/` folder or modify `bin/scaffold.js` for new behavior.
 
 ## Contributing
 
-Contributions are welcome. To contribute:
-
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature-name`).
-3. Make your changes, including tests if appropriate.
-4. Commit and push your branch.
-5. Open a pull request.
-
-## License
-
-This project is licensed under the MIT License.
-
+1. Add or update recipes in `recipes/`.  
+2. Edit `bin/scaffold.js` for new features.  
+3. Run tests or add new ones.  
+4. Bump version and `npm publish --access public`.
