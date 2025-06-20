@@ -1,0 +1,25 @@
+# recipes/nextjs-tailwind.yaml
+github:
+  owner: lukegordoncunningham
+  visibility: public
+  templateRepo: nextjs-tailwind-template
+  branches:
+    default: main
+    integration: dev
+  protection:
+    contexts: [ lint, test, build ]
+    approvals:
+      dev: 1
+      main: 2
+  secrets:
+    - name: VERCEL_TOKEN
+      fromEnv: VERCEL_TOKEN
+
+project:
+  type: NextjsProject
+  defaultReleaseBranch: main
+  packageManager: NPM
+  deps: [ react, react-dom, next ]
+  devDeps: [ eslint, prettier, tailwindcss, postcss, autoprefixer ]
+  eslint: true
+  prettier: true

@@ -1,0 +1,19 @@
+# recipes/scratch.yaml
+github:
+  owner: lukegordoncunningham
+  visibility: public
+
+  branches:
+    default: main
+    integration: dev
+
+  protection:
+    contexts: [ lint, test, build ]
+    approvals:
+      dev: 1
+      main: 2
+    strict: true
+    dismissStaleReviews: true
+    enforceAdmins: true
+
+# no `templateRepo` means “start with an empty repo”
