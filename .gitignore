@@ -30,7 +30,6 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
-.DS_store
 /test-reports/
 junit.xml
 /coverage/
@@ -43,4 +42,5 @@ junit.xml
 !/.github/pull_request_template.md
 !/.prettierignore
 !/.prettierrc.json
+.DS_Store
 !/.projenrc.js
