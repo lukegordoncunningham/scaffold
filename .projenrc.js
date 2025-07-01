@@ -47,6 +47,9 @@ const project = new javascript.NodeProject({
 
   // GitHub & CI integrations
   github: true,
+  gitignore: [
+    ".DS_store"
+  ],
   githubOptions: {
     pullRequestLintOptions: {
       semanticTitle: true,
