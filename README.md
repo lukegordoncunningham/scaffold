@@ -1,6 +1,6 @@
 # Scaffold (npx @lukecunningham/scaffold)
 
-Scaffold is a Node.js CLI (published on npm) that automates creating and configuring GitHub repositories from simple YAML “recipes.” You can combine multiple recipes, seed from a local folder or template repo, set up branches and protection rules, wire in secrets, and even bootstrap a new Projen-powered project—all with one command.
+Scaffold is a simple Node.js CLI  that combines the GitHub CLI with Projen for one-click repo and project creation with CI/CD via simple YAML configs.
 
 ---
 
