@@ -42,4 +42,5 @@ junit.xml
 !/.github/pull_request_template.md
 !/.prettierignore
 !/.prettierrc.json
+.DS_Store
 !/.projenrc.js

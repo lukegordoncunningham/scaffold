@@ -46,7 +46,7 @@ const project = new javascript.NodeProject({
   },
 
   // GitHub & CI integrations
-  github: true,
+  github: true, 
   githubOptions: {
     pullRequestLintOptions: {
       semanticTitle: true,
@@ -56,5 +56,5 @@ const project = new javascript.NodeProject({
   release: true,
   dependabot: true,
 });
-
+project.gitignore.addPatterns('.DS_Store');
 project.synth();
