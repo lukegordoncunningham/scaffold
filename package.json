@@ -1,7 +1,8 @@
 {
   "name": "@lukecunningham/scaffold",
   "bin": {
-    "scaffold": "bin/scaffold.js"
+    "scaffold": "bin/scaffold.js",
+    "scaffold.js": "bin/scaffold.js"
   },
   "scripts": {
     "build": "npx projen build",

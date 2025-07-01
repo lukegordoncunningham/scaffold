@@ -43,4 +43,3 @@ junit.xml
 !/.prettierignore
 !/.prettierrc.json
 !/.projenrc.js
-.DS_Store
