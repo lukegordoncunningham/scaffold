@@ -4848,6 +4848,6 @@ yoctocolors-cjs@^2.1.2:
   integrity sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA==
 
 zx@^8.5.5:
-  version "8.5.5"
-  resolved "https://registry.yarnpkg.com/zx/-/zx-8.5.5.tgz#347633ecc8c68e96415739f8b1a160848dc7fe8c"
-  integrity sha512-kzkjV3uqyEthw1IBDbA7Co2djji77vCP1DRvt58aYSMwiX4nyvAkFE8OBSEsOUbDJAst0Yo4asNvMTGG5HGPXA==
+  version "8.7.0"
+  resolved "https://registry.yarnpkg.com/zx/-/zx-8.7.0.tgz#6924ce6b3ca1dc68a711f5b73c7a4f932f730719"
+  integrity sha512-pArftqj5JV/er8p+czFZwF+k6SbCldl7kcfCR+rIiDIh3gUsLB0F3Xh05diP8PzToZ39D/GWeFoVFimjHQkbAg==
