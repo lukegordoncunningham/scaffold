@@ -54,6 +54,7 @@ const project = new javascript.NodeProject({
   },
 
   release: true,
+  depsUpgrade: false,
   dependabot: false,
 });
 project.gitignore.addPatterns('.DS_Store');
